@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans 
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/security
+        http://www.springframework.org/schema/security/spring-security.xsd
+        http://www.springframework.org/schema/util  
+        http://www.springframework.org/schema/util/spring-util-3.1.xsd">
+	
+	<context:component-scan base-package="controller, api, service, repository, entity, security" />
+	<mvc:annotation-driven />
+
+	<util:properties id="config" location="classpath:/config.properties"/>
+	
+	<security:http pattern="/api/user/signUp" security="none"/>
+	<!-- will be deleted -->
+	<security:http pattern="/api/file/**" security="none"/>
+    <security:http pattern="/api/**" entry-point-ref="restAuthenticationEntryPoint" create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:custom-filter before="FORM_LOGIN_FILTER" ref="jwtAuthenticationFilter"/>
+    </security:http>
+    <bean id="jwtAuthenticationFilter" class="security.JwtAuthenticationFilter">
+        <property name="authenticationManager" ref="authenticationManager" />
+        <property name="authenticationSuccessHandler" ref="jwtAuthenticationSuccessHandler" />
+    </bean>
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider ref="jwtAuthenticationProvider" />
+    </security:authentication-manager>
+    
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="100000000" />
+        <property name="maxInMemorySize" value="100000000" />
+    </bean>
+    		
+  </beans>
