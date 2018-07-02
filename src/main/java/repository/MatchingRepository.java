@@ -2,14 +2,11 @@ package repository;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import entity.Matching;
-import entity.Member;
 
 public interface MatchingRepository extends JpaRepository<Matching, Integer>{
 	
@@ -30,12 +27,10 @@ public interface MatchingRepository extends JpaRepository<Matching, Integer>{
 	)
 	List<Matching> getMatches(Pageable pageable);
 	
-	// ---------------------------------------------------------------------------------------------------------------------------------------------------
-	
 	@Query(
 			"SELECT DISTINCT(m) "
-		  + "FROM Matching AS m LEFT JOIN Apply AS a "
-		  + "ON m.id = a.matching.id "
+		  + "FROM Matching AS m "
+		  + "LEFT JOIN Apply AS a ON m.id = a.matching.id "
 		  + "WHERE (m.homeTeam.id = :teamId OR a.team.id = :teamId) "
 		  + "ORDER BY m.start DESC"
 	)

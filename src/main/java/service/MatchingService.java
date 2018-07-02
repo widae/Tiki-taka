@@ -1,12 +1,9 @@
 package service;
 
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
 import entity.Matching;
 import entity.Team;
 import repository.MatchingRepository;
@@ -20,7 +17,25 @@ public class MatchingService implements IMatchingService{
 	
 	@Autowired
 	private TeamRepository teamRepository;
-		
+	
+	public synchronized boolean addMatching(Matching matching){
+		int numOfDuplicated = matchingRepository.getNumOfDuplicated(matching.getStart(), matching.getEnd(), new Integer(matching.getGround().getId())); 	
+        if(numOfDuplicated > 0){
+           return false;
+        }else{
+        	matchingRepository.save(matching);
+        	return true;
+        }
+	}
+	
+	public List<Matching> getMatches(int pageNum){
+		return matchingRepository.getMatches(PageRequest.of((pageNum-1)*20, 20));
+	}
+	
+	public List<Matching> getRelatedMatches(int teamId, int pageNum){
+		return matchingRepository.getRelatedMatches(teamId, PageRequest.of((pageNum-1)*20, 20));
+	}
+	
 	public void updateMatching(Matching matching){
 		matchingRepository.save(matching);
 	}
@@ -32,29 +47,6 @@ public class MatchingService implements IMatchingService{
 	public Matching getMatchingById(Integer matchingId){
 		return matchingRepository.findById(matchingId).get();
 	}
-	
-	public List<Matching> getMatches(int pageNum){
-		return matchingRepository.getMatches(PageRequest.of((pageNum-1)*20, 20));
-	}
-	
-
-	public synchronized boolean addMatching(Matching matching){
-		int numOfDuplicated = matchingRepository.getNumOfDuplicated(matching.getStart(), matching.getEnd(), new Integer(matching.getGround().getId())); 	
-        if(numOfDuplicated > 0){
-           return false;
-        }else{
-        	matchingRepository.save(matching);
-        	return true;
-        }
-	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------------------------------
-	
-	public List<Matching> getRelatedMatches(int teamId, int pageNum){
-		return matchingRepository.getRelatedMatches(teamId, PageRequest.of((pageNum-1)*20, 20));
-	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	public void complete(int matchingId, int teamId){
 		Matching matching = matchingRepository.getOne(matchingId);
